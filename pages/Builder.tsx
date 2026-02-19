@@ -4,7 +4,7 @@ import Visualizer from '../components/Visualizer';
 import Stepper from '../components/Stepper';
 import ConsultationModal from '../components/ConsultationModal';
 import { ShadeConfig, Fabric, WindowSelection, CartItem, RoomAnalysis, ShapeType } from '../types';
-import { DEFAULT_ROOM_IMAGE, getGridPrice, SHAPE_CONFIGS, VALANCE_OPTIONS, SIDE_CHANNEL_OPTIONS, STEPS } from '../constants';
+import { DEFAULT_ROOM_IMAGE, getGridPrice, SHAPE_CONFIGS, VALANCE_OPTIONS, SIDE_CHANNEL_OPTIONS, STEPS, getFabricUrl } from '../constants';
 import { getDynamicFabrics } from '../utils/storage';
 import { useLanguage } from '../LanguageContext';
 import { trackEvent } from '../utils/analytics';
@@ -40,6 +40,7 @@ const SwatchPath: React.FC<{
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set(existingSwatches.map(s => s.id)));
   const [showForm, setShowForm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
 
   const toggleSwatch = (fabric: Fabric) => {
     const next = new Set(selectedIds);
@@ -80,7 +81,9 @@ const SwatchPath: React.FC<{
         <div className="flex gap-2 flex-wrap mb-5 p-3 rounded-xl" style={{ backgroundColor: '#f9f7f3', border: '1px solid #ece8e0' }}>
           {fabrics.filter(f => selectedIds.has(f.id)).map(f => (
             <div key={f.id} className="flex items-center gap-1.5 bg-white px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-[#666]" style={{ border: '1px solid #e8e5de' }}>
-              <div className="w-4 h-4 rounded-sm" style={{ backgroundColor: `rgb(${f.rgb.r},${f.rgb.g},${f.rgb.b})` }} />
+              <div className="w-6 h-6 rounded-sm overflow-hidden bg-gray-50">
+                <img src={getFabricUrl(f.cloudinaryId, 'thumb')} alt={f.name} className="w-full h-full object-cover" />
+              </div>
               {f.name}
             </div>
           ))}
@@ -129,9 +132,9 @@ const SwatchPath: React.FC<{
   const categories = ['Light Filtering', 'Blackout'] as const;
 
   return (
-    <div className="p-5" style={{ animation: 'fadeUp 0.4s ease forwards' }}>
+    <div className="p-5 overflow-y-auto" style={{ animation: 'fadeUp 0.4s ease forwards' }}>
       <div className="text-center mb-6">
-        <h2 className="text-lg font-light text-[#1a1a1a] tracking-tight mb-1">Choose Your Free Swatches</h2>
+        <h2 className="text-xl font-normal text-[#1a1a1a] tracking-tight mb-1" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>Choose Your Free Swatches</h2>
         <p className="text-[11px] text-[#aaa] font-normal">Select up to 5 fabrics — shipped at no cost</p>
       </div>
 
@@ -144,31 +147,39 @@ const SwatchPath: React.FC<{
           return (
             <div key={cat} className="mb-5">
               <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#aaa] mb-2.5">{cat}</p>
-              <div className="flex gap-2.5 flex-wrap">
+              <div className="grid grid-cols-4 gap-2">
                 {catFabrics.map(f => {
                   const isSelected = selectedIds.has(f.id);
                   const isDisabled = !isSelected && selectedIds.size >= 5;
+                  const hasError = imgErrors[f.id];
                   return (
                     <div
                       key={f.id}
                       onClick={() => !isDisabled && toggleSwatch(f)}
-                      className={`relative flex flex-col items-center gap-1.5 cursor-pointer transition-all duration-200 ${isDisabled ? 'opacity-25' : 'hover:scale-105'}`}
+                      className={`flex flex-col group cursor-pointer transition-all duration-200 ${isDisabled ? 'opacity-25 pointer-events-none' : ''}`}
                     >
-                      <div
-                        className="w-12 h-12 rounded-lg transition-all duration-200"
-                        style={{
-                          backgroundColor: `rgb(${f.rgb.r},${f.rgb.g},${f.rgb.b})`,
-                          border: isSelected ? '2px solid #c8a165' : '1px solid rgba(0,0,0,0.06)',
-                          boxShadow: isSelected ? '0 0 0 3px rgba(200,161,101,0.15), 0 2px 8px rgba(0,0,0,0.08)' : '0 1px 4px rgba(0,0,0,0.04)'
-                        }}
-                      >
+                      <div className={`relative w-full aspect-square rounded-lg overflow-hidden bg-gray-50 border-2 transition-all ${
+                        isSelected ? 'border-[#c8a165] shadow-md ring-1 ring-[#c8a165]' : 'border-transparent hover:border-gray-200'
+                      }`}>
+                        {!hasError ? (
+                          <img
+                            src={getFabricUrl(f.cloudinaryId, 'thumb')}
+                            alt={f.name}
+                            onError={() => setImgErrors(prev => ({...prev, [f.id]: true}))}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: `rgb(${f.rgb.r},${f.rgb.g},${f.rgb.b})` }} />
+                        )}
                         {isSelected && (
-                          <div className="absolute -top-1 -right-1 w-4.5 h-4.5 rounded-full flex items-center justify-center" style={{ backgroundColor: '#c8a165', width: '18px', height: '18px', boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}>
-                            <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          <div className="absolute bottom-1 right-1 w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: '#c8a165' }}>
+                            <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                           </div>
                         )}
                       </div>
-                      <span className={`text-[8px] font-medium text-center max-w-[52px] leading-tight ${isSelected ? 'text-[#8b6d3f]' : 'text-[#999]'}`}>{f.name}</span>
+                      <span className={`text-[8px] font-medium text-center mt-1 leading-tight truncate ${isSelected ? 'text-[#8b6d3f]' : 'text-[#999]'}`}>
+                        {f.name}
+                      </span>
                     </div>
                   );
                 })}
@@ -188,7 +199,7 @@ const SwatchPath: React.FC<{
         disabled={selectedIds.size === 0}
         className="w-full py-3 rounded-xl text-white font-medium text-[13px] tracking-wide transition-all duration-200"
         style={selectedIds.size > 0 
-          ? { background: 'linear-gradient(135deg, #c8a165, #b8914f)', boxShadow: '0 2px 15px rgba(200,161,101,0.2)' } 
+          ? { background: 'linear-gradient(90deg, #C8A165 0%, #E7D8B8 55%, #C8A165 100%)', boxShadow: '0 4px 20px rgba(200,161,101,0.18)' } 
           : { backgroundColor: '#e0dcd5', color: '#bbb', cursor: 'not-allowed' }
         }
       >
