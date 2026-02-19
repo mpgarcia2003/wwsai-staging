@@ -1,0 +1,7 @@
+{
+  "name": "Custom Shade Builder",
+  "description": "A responsive visualizer and configuration tool for custom roller shades.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
