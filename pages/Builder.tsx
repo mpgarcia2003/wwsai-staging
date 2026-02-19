@@ -440,16 +440,16 @@ const Builder: React.FC<BuilderProps> = ({ addToCart, addToSwatches, swatches })
           {/* Trust signals */}
           <div className="flex justify-center items-center gap-10">
             <div className="flex flex-col items-center gap-2">
-              <PenTool size={18} className="text-[#bbb]" strokeWidth={1.5} />
-              <span className="text-[9px] font-medium text-[#aaa] uppercase tracking-[0.15em]">Any Shape</span>
-            </div>
-            <div className="flex flex-col items-center gap-2">
               <Package size={18} className="text-[#bbb]" strokeWidth={1.5} />
-              <span className="text-[9px] font-medium text-[#aaa] uppercase tracking-[0.15em]">7-Day Shipping</span>
+              <span className="text-[9px] font-medium text-[#aaa] uppercase tracking-[0.15em]">Factory Direct</span>
             </div>
             <div className="flex flex-col items-center gap-2">
               <Truck size={18} className="text-[#bbb]" strokeWidth={1.5} />
-              <span className="text-[9px] font-medium text-[#aaa] uppercase tracking-[0.15em]">Free Shipping</span>
+              <span className="text-[9px] font-medium text-[#aaa] uppercase tracking-[0.15em]">7-Day Shipping</span>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <PenTool size={18} className="text-[#bbb]" strokeWidth={1.5} />
+              <span className="text-[9px] font-medium text-[#aaa] uppercase tracking-[0.15em]">Any Shape</span>
             </div>
           </div>
 
