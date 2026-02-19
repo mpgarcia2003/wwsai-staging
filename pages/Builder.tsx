@@ -383,80 +383,125 @@ const Builder: React.FC<BuilderProps> = ({ addToCart, addToSwatches, swatches })
   // ─── FORK / PATH CHOOSER ──────────────────────────
   if (path === null) {
     return (
-      <div className="bg-white h-full w-full overflow-auto flex items-center justify-center" style={{ background: '#FDFBF7' }}>
-        <div className="max-w-xl w-full px-6 py-16" style={{ animation: 'fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}>
-          
+      <div
+        className="h-full w-full overflow-auto flex items-center justify-center"
+        style={{ background: '#FDFBF7' }}
+      >
+        <div
+          className="max-w-xl w-full px-6 py-16"
+          style={{ animation: 'fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}
+        >
           {/* Headline */}
           <div className="text-center mb-10">
-            <h1 className="text-[32px] md:text-[40px] font-normal text-[#1a1a1a] leading-[1.15] mb-4" style={{ fontFamily: "'Playfair Display', Georgia, serif", letterSpacing: '-0.02em' }}>
-              Custom Shades Built for<br />
+            <h1
+              className="text-[34px] md:text-[48px] font-normal text-[#141414] leading-[1.12] mb-4"
+              style={{
+                fontFamily: "'Playfair Display', Georgia, serif",
+                letterSpacing: '-0.02em',
+              }}
+            >
+              Custom Shades Built for
+              <br />
               Windows No One Else Can Fit
             </h1>
-            <p className="text-[14px] text-[#999] font-normal tracking-wide">
+            <p className="text-[13px] md:text-[14px] text-[#8f8f8f] font-normal">
               Factory-direct with 7-day shipping
             </p>
           </div>
 
           {/* Primary CTA — Build */}
           <button
-            onClick={() => { setPath('build'); setOpenStep(0); trackEvent('path_selected', { path: 'build' }); }}
-            className="w-full mb-3 transition-all duration-300 hover:shadow-xl active:scale-[0.995] group"
-            style={{ 
-              background: 'linear-gradient(135deg, #d4b37a 0%, #c8a165 40%, #b8914f 100%)',
-              borderRadius: '14px',
-              boxShadow: '0 4px 24px rgba(200, 161, 101, 0.2)',
-              padding: '22px 28px'
+            onClick={() => {
+              setPath('build');
+              setOpenStep(0);
+              trackEvent('path_selected', { path: 'build' });
+            }}
+            className="w-full mb-4 transition-all duration-300 active:scale-[0.995] group"
+            style={{
+              borderRadius: 14,
+              padding: '20px 26px',
+              background: 'linear-gradient(90deg, #C8A165 0%, #E7D8B8 55%, #C8A165 100%)',
+              boxShadow: '0 10px 34px rgba(200,161,101,0.18)',
             }}
           >
             <div className="flex items-center justify-between">
               <div className="text-left">
-                <div className="text-[16px] font-medium text-white mb-0.5" style={{ letterSpacing: '0.01em' }}>Build My Custom Shade</div>
-                <div className="text-[12px] text-white/55 font-normal">Configure shape, fabric, size & more</div>
+                <div
+                  className="text-[16px] md:text-[18px] font-medium text-[#141414] mb-1"
+                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                >
+                  Build My Custom Shade
+                </div>
+                <div className="text-[12px] text-[#2b2b2b]/60 font-normal">
+                  Configure shape, fabric, size & more
+                </div>
               </div>
-              <ChevronRight size={20} className="text-white/30 group-hover:text-white/70 group-hover:translate-x-0.5 transition-all shrink-0 ml-4" />
+
+              <ChevronRight
+                size={20}
+                className="text-[#2b2b2b]/30 group-hover:text-[#2b2b2b]/60 group-hover:translate-x-0.5 transition-all shrink-0 ml-4"
+              />
             </div>
           </button>
 
           {/* Secondary CTA — Swatches */}
           <button
-            onClick={() => { setPath('swatch'); trackEvent('path_selected', { path: 'swatch' }); }}
-            className="w-full mb-12 transition-all duration-300 hover:shadow-lg active:scale-[0.995] group"
-            style={{ 
-              border: '1px solid #e4e0d8',
-              borderRadius: '14px',
-              backgroundColor: '#f9f7f3',
-              padding: '22px 28px'
+            onClick={() => {
+              setPath('swatch');
+              trackEvent('path_selected', { path: 'swatch' });
+            }}
+            className="w-full mb-12 transition-all duration-300 active:scale-[0.995] group"
+            style={{
+              border: '1px solid rgba(20,20,20,0.10)',
+              borderRadius: 14,
+              background: 'rgba(255,255,255,0.55)',
+              padding: '20px 26px',
+              boxShadow: '0 6px 22px rgba(0,0,0,0.04)',
+              backdropFilter: 'blur(6px)',
             }}
           >
             <div className="flex items-center justify-between">
               <div className="text-left">
-                <div className="text-[16px] font-medium text-[#333] mb-0.5" style={{ letterSpacing: '0.01em' }}>Send Me Free Swatches</div>
-                <div className="text-[12px] text-[#aaa] font-normal">Get up to 5 fabric samples shipped free</div>
+                <div
+                  className="text-[16px] md:text-[18px] font-medium text-[#141414] mb-1"
+                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                >
+                  Send Me Free Swatches
+                </div>
+                <div className="text-[12px] text-[#8f8f8f] font-normal">
+                  Get up to 5 fabric samples shipped free
+                </div>
               </div>
-              <ChevronRight size={20} className="text-[#ccc] group-hover:text-[#999] group-hover:translate-x-0.5 transition-all shrink-0 ml-4" />
+
+              <ChevronRight
+                size={20}
+                className="text-[#bdbdbd] group-hover:text-[#8f8f8f] group-hover:translate-x-0.5 transition-all shrink-0 ml-4"
+              />
             </div>
           </button>
 
           {/* Trust signals */}
-          <div className="flex justify-center items-center gap-10">
-            <div className="flex flex-col items-center gap-2">
-              <Package size={18} className="text-[#bbb]" strokeWidth={1.5} />
-              <span className="text-[9px] font-medium text-[#aaa] uppercase tracking-[0.15em]">Factory Direct</span>
-            </div>
-            <div className="flex flex-col items-center gap-2">
-              <Truck size={18} className="text-[#bbb]" strokeWidth={1.5} />
-              <span className="text-[9px] font-medium text-[#aaa] uppercase tracking-[0.15em]">7-Day Shipping</span>
-            </div>
-            <div className="flex flex-col items-center gap-2">
-              <PenTool size={18} className="text-[#bbb]" strokeWidth={1.5} />
-              <span className="text-[9px] font-medium text-[#aaa] uppercase tracking-[0.15em]">Any Shape</span>
-            </div>
+          <div className="flex justify-center items-center gap-12">
+            {[
+              { label: 'Factory Direct', Icon: Package },
+              { label: '7-Day Shipping', Icon: Truck },
+              { label: 'Any Shape', Icon: PenTool },
+            ].map(({ label, Icon }) => (
+              <div key={label} className="flex flex-col items-center gap-2">
+                <Icon size={18} className="text-[#bdbdbd]" strokeWidth={1.25} />
+                <span className="text-[9px] font-medium text-[#a7a7a7] uppercase tracking-[0.18em]">
+                  {label}
+                </span>
+              </div>
+            ))}
           </div>
-
         </div>
 
         <style>{`
-          @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+          @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
         `}</style>
       </div>
     );
