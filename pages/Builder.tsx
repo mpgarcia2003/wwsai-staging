@@ -388,7 +388,7 @@ const Builder: React.FC<BuilderProps> = ({ addToCart, addToSwatches, swatches })
           
           {/* Headline */}
           <div className="text-center mb-10">
-            <h1 className="text-[32px] md:text-[40px] font-light text-[#1a1a1a] leading-[1.15] mb-4" style={{ letterSpacing: '-0.03em' }}>
+            <h1 className="text-[32px] md:text-[40px] font-normal text-[#1a1a1a] leading-[1.15] mb-4" style={{ fontFamily: "'Playfair Display', Georgia, serif", letterSpacing: '-0.02em' }}>
               Custom Shades Built for<br />
               Windows No One Else Can Fit
             </h1>
