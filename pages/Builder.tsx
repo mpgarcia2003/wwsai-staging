@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ShoppingCart, Ruler, FileText, Hash, Truck, ArrowRight, ArrowLeft, Palette, Wrench } from 'lucide-react';
+import { ShoppingCart, Ruler, FileText, Hash, Truck, ArrowRight, ArrowLeft, Palette, Wrench, Layers, Package, PenTool, ChevronRight } from 'lucide-react';
 import Visualizer from '../components/Visualizer';
 import Stepper from '../components/Stepper';
 import ConsultationModal from '../components/ConsultationModal';
@@ -54,21 +54,21 @@ const SwatchPath: React.FC<{
 
   if (submitted) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 text-center" style={{ animation: 'fadeUp 0.5s ease forwards' }}>
-        <div className="w-16 h-16 rounded-full flex items-center justify-center mb-5" style={{ background: 'linear-gradient(135deg, #c8a165, #d4b07a)' }}>
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M4 12L10 18L20 6" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      <div className="flex flex-col items-center justify-center p-10 text-center" style={{ animation: 'fadeUp 0.5s ease forwards' }}>
+        <div className="w-14 h-14 rounded-full flex items-center justify-center mb-6" style={{ background: 'linear-gradient(135deg, #c8a165, #b8914f)' }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 12L10 18L20 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </div>
-        <h2 className="text-xl font-black text-slate-900 mb-2">Swatches on the Way!</h2>
-        <p className="text-sm text-slate-500 mb-1 max-w-xs">
+        <h2 className="text-xl font-light text-[#1a1a1a] tracking-tight mb-2" style={{ letterSpacing: '-0.01em' }}>Swatches on the Way</h2>
+        <p className="text-[13px] text-[#999] mb-1 max-w-xs font-normal">
           Your {selectedIds.size} free swatch{selectedIds.size > 1 ? 'es' : ''} will arrive in 3–5 business days.
         </p>
-        <p className="text-xs text-slate-400 mb-6">We'll include a 10% off coupon with your swatches</p>
+        <p className="text-[11px] text-[#bbb] mb-8">A 10% off coupon will be included with your swatches</p>
         <button
           onClick={onBack}
-          className="px-6 py-3 rounded-xl text-white font-bold text-sm transition-all hover:opacity-90"
-          style={{ background: 'linear-gradient(135deg, #c8a165, #b8914f)', boxShadow: '0 4px 15px rgba(200,161,101,0.3)' }}
+          className="px-8 py-3 rounded-xl text-white font-medium text-[13px] tracking-wide transition-all hover:opacity-90"
+          style={{ background: 'linear-gradient(135deg, #c8a165, #b8914f)', boxShadow: '0 2px 15px rgba(200,161,101,0.2)' }}
         >
-          Ready to Build Your Shade?
+          Ready to Build Your Shade
         </button>
       </div>
     );
@@ -76,18 +76,18 @@ const SwatchPath: React.FC<{
 
   if (showForm) {
     return (
-      <div className="p-4" style={{ animation: 'fadeUp 0.4s ease forwards' }}>
-        <div className="flex gap-2 flex-wrap mb-4 p-3 rounded-xl" style={{ backgroundColor: '#faf8f4' }}>
+      <div className="p-5" style={{ animation: 'fadeUp 0.4s ease forwards' }}>
+        <div className="flex gap-2 flex-wrap mb-5 p-3 rounded-xl" style={{ backgroundColor: '#f9f7f3', border: '1px solid #ece8e0' }}>
           {fabrics.filter(f => selectedIds.has(f.id)).map(f => (
-            <div key={f.id} className="flex items-center gap-1.5 bg-white px-2 py-1 rounded-lg border border-gray-100 text-[11px] font-bold text-slate-600">
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `rgb(${f.rgb.r},${f.rgb.g},${f.rgb.b})` }} />
+            <div key={f.id} className="flex items-center gap-1.5 bg-white px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-[#666]" style={{ border: '1px solid #e8e5de' }}>
+              <div className="w-4 h-4 rounded-sm" style={{ backgroundColor: `rgb(${f.rgb.r},${f.rgb.g},${f.rgb.b})` }} />
               {f.name}
             </div>
           ))}
         </div>
 
-        <h3 className="text-lg font-black text-slate-900 mb-1">Where should we send them?</h3>
-        <p className="text-xs text-slate-400 mb-4">100% free — no credit card required</p>
+        <h3 className="text-lg font-light text-[#1a1a1a] mb-1 tracking-tight">Where should we send them?</h3>
+        <p className="text-[11px] text-[#aaa] mb-5">100% free — no credit card required</p>
 
         {[
           { label: 'Full Name', placeholder: 'Jane Smith', type: 'text' },
@@ -96,14 +96,14 @@ const SwatchPath: React.FC<{
           { label: 'City, State, ZIP', placeholder: 'New York, NY 10001', type: 'text' },
         ].map((field, i) => (
           <div key={i} className="mb-3">
-            <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 block mb-1">{field.label}</label>
+            <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#aaa] block mb-1">{field.label}</label>
             <input
               type={field.type}
               placeholder={field.placeholder}
-              className="w-full p-3 rounded-lg border border-gray-200 text-sm font-medium outline-none transition-colors"
-              style={{ fontFamily: 'inherit' }}
-              onFocus={(e) => e.target.style.borderColor = '#c8a165'}
-              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+              className="w-full p-3 rounded-lg text-[13px] font-normal outline-none transition-all duration-200"
+              style={{ fontFamily: 'inherit', border: '1px solid #e0dcd5', color: '#333' }}
+              onFocus={(e) => { e.target.style.borderColor = '#c8a165'; e.target.style.boxShadow = '0 0 0 3px rgba(200,161,101,0.08)'; }}
+              onBlur={(e) => { e.target.style.borderColor = '#e0dcd5'; e.target.style.boxShadow = 'none'; }}
             />
           </div>
         ))}
@@ -113,12 +113,12 @@ const SwatchPath: React.FC<{
             setSubmitted(true);
             trackEvent('swatch_order_submitted', { swatch_count: selectedIds.size });
           }}
-          className="w-full mt-2 py-3 rounded-xl text-white font-black text-sm uppercase tracking-wider transition-all hover:opacity-90"
-          style={{ background: 'linear-gradient(135deg, #c8a165, #b8914f)', boxShadow: '0 4px 15px rgba(200,161,101,0.3)' }}
+          className="w-full mt-3 py-3 rounded-xl text-white font-medium text-[13px] tracking-wide transition-all hover:opacity-90"
+          style={{ background: 'linear-gradient(135deg, #c8a165, #b8914f)', boxShadow: '0 2px 15px rgba(200,161,101,0.2)' }}
         >
           Send My Free Swatches
         </button>
-        <button onClick={() => setShowForm(false)} className="w-full mt-2 py-2 text-slate-400 text-xs font-medium hover:text-slate-600 transition-colors">
+        <button onClick={() => setShowForm(false)} className="w-full mt-2 py-2 text-[#bbb] text-[11px] font-normal hover:text-[#888] transition-colors">
           ← Back to fabric selection
         </button>
       </div>
@@ -129,22 +129,22 @@ const SwatchPath: React.FC<{
   const categories = ['Light Filtering', 'Blackout'] as const;
 
   return (
-    <div className="p-4" style={{ animation: 'fadeUp 0.4s ease forwards' }}>
-      <div className="text-center mb-5">
-        <h2 className="text-lg font-black text-slate-900 mb-1">Choose Your Free Swatches</h2>
-        <p className="text-xs text-slate-400">Select up to 5 fabrics — we'll ship them free</p>
+    <div className="p-5" style={{ animation: 'fadeUp 0.4s ease forwards' }}>
+      <div className="text-center mb-6">
+        <h2 className="text-lg font-light text-[#1a1a1a] tracking-tight mb-1">Choose Your Free Swatches</h2>
+        <p className="text-[11px] text-[#aaa] font-normal">Select up to 5 fabrics — shipped at no cost</p>
       </div>
 
       {loadingFabrics ? (
-        <div className="text-center py-8 text-slate-400 text-sm">Loading fabrics...</div>
+        <div className="text-center py-8 text-[#bbb] text-[13px] font-normal">Loading fabrics...</div>
       ) : (
         categories.map(cat => {
           const catFabrics = fabrics.filter(f => f.category === cat);
           if (catFabrics.length === 0) return null;
           return (
-            <div key={cat} className="mb-4">
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">{cat}</p>
-              <div className="flex gap-2 flex-wrap">
+            <div key={cat} className="mb-5">
+              <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#aaa] mb-2.5">{cat}</p>
+              <div className="flex gap-2.5 flex-wrap">
                 {catFabrics.map(f => {
                   const isSelected = selectedIds.has(f.id);
                   const isDisabled = !isSelected && selectedIds.size >= 5;
@@ -152,24 +152,23 @@ const SwatchPath: React.FC<{
                     <div
                       key={f.id}
                       onClick={() => !isDisabled && toggleSwatch(f)}
-                      className={`relative flex flex-col items-center gap-1 cursor-pointer transition-all ${isDisabled ? 'opacity-30' : 'hover:scale-105'}`}
-                      style={isSelected ? { transform: 'scale(1.05)' } : {}}
+                      className={`relative flex flex-col items-center gap-1.5 cursor-pointer transition-all duration-200 ${isDisabled ? 'opacity-25' : 'hover:scale-105'}`}
                     >
                       <div
-                        className="w-12 h-12 rounded-lg border-2 transition-all"
+                        className="w-12 h-12 rounded-lg transition-all duration-200"
                         style={{
                           backgroundColor: `rgb(${f.rgb.r},${f.rgb.g},${f.rgb.b})`,
-                          borderColor: isSelected ? '#c8a165' : 'transparent',
-                          boxShadow: isSelected ? '0 0 0 2px #c8a165, 0 4px 12px rgba(200,161,101,0.2)' : 'none'
+                          border: isSelected ? '2px solid #c8a165' : '1px solid rgba(0,0,0,0.06)',
+                          boxShadow: isSelected ? '0 0 0 3px rgba(200,161,101,0.15), 0 2px 8px rgba(0,0,0,0.08)' : '0 1px 4px rgba(0,0,0,0.04)'
                         }}
                       >
                         {isSelected && (
-                          <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: '#c8a165', boxShadow: '0 2px 6px rgba(0,0,0,0.15)' }}>
-                            <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          <div className="absolute -top-1 -right-1 w-4.5 h-4.5 rounded-full flex items-center justify-center" style={{ backgroundColor: '#c8a165', width: '18px', height: '18px', boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}>
+                            <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                           </div>
                         )}
                       </div>
-                      <span className={`text-[8px] font-bold text-center max-w-[52px] leading-tight ${isSelected ? 'text-[#8b6d3f]' : 'text-slate-500'}`}>{f.name}</span>
+                      <span className={`text-[8px] font-medium text-center max-w-[52px] leading-tight ${isSelected ? 'text-[#8b6d3f]' : 'text-[#999]'}`}>{f.name}</span>
                     </div>
                   );
                 })}
@@ -179,21 +178,24 @@ const SwatchPath: React.FC<{
         })
       )}
 
-      <div className="text-center text-xs text-slate-400 mb-3">
-        {selectedIds.size}/5 swatches selected
-        {selectedIds.size >= 5 && <span className="text-amber-600 font-bold"> (maximum reached)</span>}
+      <div className="text-center text-[11px] text-[#bbb] mb-3 font-normal">
+        {selectedIds.size}/5 selected
+        {selectedIds.size >= 5 && <span className="text-[#c8a165] font-medium"> — maximum reached</span>}
       </div>
 
       <button
         onClick={() => selectedIds.size > 0 && setShowForm(true)}
         disabled={selectedIds.size === 0}
-        className="w-full py-3 rounded-xl text-white font-black text-xs uppercase tracking-widest transition-all disabled:opacity-30"
-        style={selectedIds.size > 0 ? { background: 'linear-gradient(135deg, #c8a165, #b8914f)', boxShadow: '0 4px 15px rgba(200,161,101,0.3)' } : { backgroundColor: '#e0dcd5' }}
+        className="w-full py-3 rounded-xl text-white font-medium text-[13px] tracking-wide transition-all duration-200"
+        style={selectedIds.size > 0 
+          ? { background: 'linear-gradient(135deg, #c8a165, #b8914f)', boxShadow: '0 2px 15px rgba(200,161,101,0.2)' } 
+          : { backgroundColor: '#e0dcd5', color: '#bbb', cursor: 'not-allowed' }
+        }
       >
-        {selectedIds.size > 0 ? `Get ${selectedIds.size} Free Swatch${selectedIds.size > 1 ? 'es' : ''}` : 'Select at least one swatch'}
+        {selectedIds.size > 0 ? `Get ${selectedIds.size} Free Swatch${selectedIds.size > 1 ? 'es' : ''}` : 'Select at least one fabric'}
       </button>
-      <button onClick={onBack} className="w-full mt-2 py-2 text-slate-400 text-xs font-medium hover:text-slate-600 transition-colors">
-        ← Actually, I'm ready to build my shade
+      <button onClick={onBack} className="w-full mt-2 py-2 text-[#bbb] text-[11px] font-normal hover:text-[#888] transition-colors">
+        ← I'm ready to build my shade
       </button>
     </div>
   );
@@ -381,66 +383,94 @@ const Builder: React.FC<BuilderProps> = ({ addToCart, addToSwatches, swatches })
   // ─── FORK / PATH CHOOSER ──────────────────────────
   if (path === null) {
     return (
-      <div className="bg-white h-full w-full overflow-auto flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #FDFBF7 0%, #f5f3ec 100%)' }}>
-        <div className="max-w-md w-full px-5 py-10" style={{ animation: 'fadeUp 0.5s ease forwards' }}>
-          <div className="text-center mb-8">
-            <div className="text-4xl mb-3" style={{ animation: 'float 3s ease-in-out infinite' }}>🪟</div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight mb-2">
-              {t('common.appName') || 'Let\'s Get Started'}
+      <div className="bg-white h-full w-full overflow-auto flex items-center justify-center" style={{ background: '#FDFBF7' }}>
+        <div className="max-w-lg w-full px-6 py-12" style={{ animation: 'fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}>
+          
+          {/* Brand mark */}
+          <div className="text-center mb-10">
+            <div className="inline-block mb-6">
+              <div className="w-12 h-[2px] mx-auto" style={{ backgroundColor: '#c8a165' }} />
+            </div>
+            <h1 className="text-[28px] font-light text-[#1a1a1a] tracking-tight mb-3" style={{ fontFamily: 'inherit', letterSpacing: '-0.02em' }}>
+              Custom Shade Builder
             </h1>
-            <p className="text-sm text-slate-400 font-medium leading-relaxed max-w-xs mx-auto">
-              Custom shades for windows nobody else can fit — factory-direct with 7-day shipping
+            <p className="text-[13px] text-[#999] font-normal leading-relaxed max-w-sm mx-auto tracking-wide">
+              Precision-crafted window treatments for shapes nobody else can fit
             </p>
           </div>
 
-          {/* Build path */}
+          {/* Primary CTA — Build */}
           <button
             onClick={() => { setPath('build'); setOpenStep(0); trackEvent('path_selected', { path: 'build' }); }}
-            className="w-full text-left p-5 bg-white rounded-2xl border-2 border-gray-100 mb-3 transition-all hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 flex items-center gap-4 group"
+            className="w-full mb-3 transition-all duration-300 hover:shadow-xl active:scale-[0.99] group"
+            style={{ 
+              background: 'linear-gradient(135deg, #c8a165 0%, #b8914f 100%)',
+              borderRadius: '12px',
+              boxShadow: '0 2px 20px rgba(200, 161, 101, 0.15)'
+            }}
           >
-            <div className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl shrink-0" style={{ background: 'linear-gradient(135deg, #c8a165, #d4b07a)' }}>
-              🛠
+            <div className="flex items-center p-5">
+              <div className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 mr-4" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
+                <Layers size={22} className="text-white" strokeWidth={1.5} />
+              </div>
+              <div className="flex-1 min-w-0 text-left">
+                <div className="text-[15px] font-semibold text-white mb-0.5 tracking-wide">Build My Custom Shade</div>
+                <div className="text-[11px] text-white/60 font-normal leading-snug">Configure shape, fabric, size & more</div>
+              </div>
+              <ChevronRight size={18} className="text-white/40 group-hover:text-white/80 group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-base font-black text-slate-900 mb-0.5">Build My Custom Shade</div>
-              <div className="text-xs text-slate-400 font-medium leading-snug">I know what I need — configure shape, fabric, size & more</div>
-            </div>
-            <ArrowRight size={18} className="text-gray-300 group-hover:text-[#c8a165] transition-colors shrink-0" />
           </button>
 
-          {/* Swatch path */}
+          {/* Secondary CTA — Swatches */}
           <button
             onClick={() => { setPath('swatch'); trackEvent('path_selected', { path: 'swatch' }); }}
-            className="w-full text-left p-5 bg-white rounded-2xl border-2 border-gray-100 mb-6 transition-all hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 flex items-center gap-4 group"
+            className="w-full mb-10 border transition-all duration-300 hover:shadow-lg hover:border-[#ccc] active:scale-[0.99] group"
+            style={{ 
+              borderColor: '#e0dcd5',
+              borderRadius: '12px',
+              backgroundColor: 'white'
+            }}
           >
-            <div className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl shrink-0" style={{ backgroundColor: '#f5f3ec' }}>
-              🎨
+            <div className="flex items-center p-5">
+              <div className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 mr-4" style={{ backgroundColor: '#f5f3ec' }}>
+                <Palette size={22} className="text-[#333]" strokeWidth={1.5} />
+              </div>
+              <div className="flex-1 min-w-0 text-left">
+                <div className="text-[15px] font-semibold text-[#333] mb-0.5 tracking-wide">Order Free Swatches</div>
+                <div className="text-[11px] text-[#999] font-normal leading-snug">Up to 5 fabric samples shipped at no cost</div>
+              </div>
+              <ChevronRight size={18} className="text-[#ccc] group-hover:text-[#999] group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-base font-black text-slate-900 mb-0.5">Send Me Free Swatches</div>
-              <div className="text-xs text-slate-400 font-medium leading-snug">Still deciding? Get up to 5 fabric samples shipped free</div>
-            </div>
-            <ArrowRight size={18} className="text-gray-300 group-hover:text-[#c8a165] transition-colors shrink-0" />
           </button>
 
-          {/* Trust badges */}
-          <div className="flex justify-center gap-6">
-            {[
-              { icon: '🏭', text: 'Factory Direct' },
-              { icon: '📦', text: '7-Day Shipping' },
-              { icon: '📐', text: 'Any Shape' },
-            ].map((b, i) => (
-              <div key={i} className="text-center flex flex-col items-center gap-1">
-                <span className="text-lg">{b.icon}</span>
-                <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider">{b.text}</span>
+          {/* Trust signals — minimal */}
+          <div className="flex justify-center items-center gap-8">
+            <div className="flex flex-col items-center gap-1.5">
+              <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: '#f5f3ec' }}>
+                <PenTool size={15} className="text-[#999]" strokeWidth={1.5} />
               </div>
-            ))}
+              <span className="text-[9px] font-medium text-[#aaa] uppercase tracking-[0.15em]">Any Shape</span>
+            </div>
+            <div className="w-[1px] h-8" style={{ backgroundColor: '#e8e5de' }} />
+            <div className="flex flex-col items-center gap-1.5">
+              <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: '#f5f3ec' }}>
+                <Package size={15} className="text-[#999]" strokeWidth={1.5} />
+              </div>
+              <span className="text-[9px] font-medium text-[#aaa] uppercase tracking-[0.15em]">7-Day Ship</span>
+            </div>
+            <div className="w-[1px] h-8" style={{ backgroundColor: '#e8e5de' }} />
+            <div className="flex flex-col items-center gap-1.5">
+              <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: '#f5f3ec' }}>
+                <Truck size={15} className="text-[#999]" strokeWidth={1.5} />
+              </div>
+              <span className="text-[9px] font-medium text-[#aaa] uppercase tracking-[0.15em]">Free Shipping</span>
+            </div>
           </div>
+
         </div>
 
         <style>{`
-          @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-          @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+          @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
         `}</style>
       </div>
     );
