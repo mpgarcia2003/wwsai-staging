@@ -384,85 +384,71 @@ const Builder: React.FC<BuilderProps> = ({ addToCart, addToSwatches, swatches })
   if (path === null) {
     return (
       <div className="bg-white h-full w-full overflow-auto flex items-center justify-center" style={{ background: '#FDFBF7' }}>
-        <div className="max-w-lg w-full px-6 py-12" style={{ animation: 'fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}>
+        <div className="max-w-xl w-full px-6 py-16" style={{ animation: 'fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}>
           
-          {/* Brand mark */}
+          {/* Headline */}
           <div className="text-center mb-10">
-            <div className="inline-block mb-6">
-              <div className="w-12 h-[2px] mx-auto" style={{ backgroundColor: '#c8a165' }} />
-            </div>
-            <h1 className="text-[28px] font-light text-[#1a1a1a] tracking-tight mb-3" style={{ fontFamily: 'inherit', letterSpacing: '-0.02em' }}>
-              Custom Shade Builder
+            <h1 className="text-[32px] md:text-[40px] font-light text-[#1a1a1a] leading-[1.15] mb-4" style={{ letterSpacing: '-0.03em' }}>
+              Custom Shades Built for<br />
+              Windows No One Else Can Fit
             </h1>
-            <p className="text-[13px] text-[#999] font-normal leading-relaxed max-w-sm mx-auto tracking-wide">
-              Precision-crafted window treatments for shapes nobody else can fit
+            <p className="text-[14px] text-[#999] font-normal tracking-wide">
+              Factory-direct with 7-day shipping
             </p>
           </div>
 
           {/* Primary CTA — Build */}
           <button
             onClick={() => { setPath('build'); setOpenStep(0); trackEvent('path_selected', { path: 'build' }); }}
-            className="w-full mb-3 transition-all duration-300 hover:shadow-xl active:scale-[0.99] group"
+            className="w-full mb-3 transition-all duration-300 hover:shadow-xl active:scale-[0.995] group"
             style={{ 
-              background: 'linear-gradient(135deg, #c8a165 0%, #b8914f 100%)',
-              borderRadius: '12px',
-              boxShadow: '0 2px 20px rgba(200, 161, 101, 0.15)'
+              background: 'linear-gradient(135deg, #d4b37a 0%, #c8a165 40%, #b8914f 100%)',
+              borderRadius: '14px',
+              boxShadow: '0 4px 24px rgba(200, 161, 101, 0.2)',
+              padding: '22px 28px'
             }}
           >
-            <div className="flex items-center p-5">
-              <div className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 mr-4" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
-                <Layers size={22} className="text-white" strokeWidth={1.5} />
+            <div className="flex items-center justify-between">
+              <div className="text-left">
+                <div className="text-[16px] font-medium text-white mb-0.5" style={{ letterSpacing: '0.01em' }}>Build My Custom Shade</div>
+                <div className="text-[12px] text-white/55 font-normal">Configure shape, fabric, size & more</div>
               </div>
-              <div className="flex-1 min-w-0 text-left">
-                <div className="text-[15px] font-semibold text-white mb-0.5 tracking-wide">Build My Custom Shade</div>
-                <div className="text-[11px] text-white/60 font-normal leading-snug">Configure shape, fabric, size & more</div>
-              </div>
-              <ChevronRight size={18} className="text-white/40 group-hover:text-white/80 group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
+              <ChevronRight size={20} className="text-white/30 group-hover:text-white/70 group-hover:translate-x-0.5 transition-all shrink-0 ml-4" />
             </div>
           </button>
 
           {/* Secondary CTA — Swatches */}
           <button
             onClick={() => { setPath('swatch'); trackEvent('path_selected', { path: 'swatch' }); }}
-            className="w-full mb-10 border transition-all duration-300 hover:shadow-lg hover:border-[#ccc] active:scale-[0.99] group"
+            className="w-full mb-12 transition-all duration-300 hover:shadow-lg active:scale-[0.995] group"
             style={{ 
-              borderColor: '#e0dcd5',
-              borderRadius: '12px',
-              backgroundColor: 'white'
+              border: '1px solid #e4e0d8',
+              borderRadius: '14px',
+              backgroundColor: '#f9f7f3',
+              padding: '22px 28px'
             }}
           >
-            <div className="flex items-center p-5">
-              <div className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 mr-4" style={{ backgroundColor: '#f5f3ec' }}>
-                <Palette size={22} className="text-[#333]" strokeWidth={1.5} />
+            <div className="flex items-center justify-between">
+              <div className="text-left">
+                <div className="text-[16px] font-medium text-[#333] mb-0.5" style={{ letterSpacing: '0.01em' }}>Send Me Free Swatches</div>
+                <div className="text-[12px] text-[#aaa] font-normal">Get up to 5 fabric samples shipped free</div>
               </div>
-              <div className="flex-1 min-w-0 text-left">
-                <div className="text-[15px] font-semibold text-[#333] mb-0.5 tracking-wide">Order Free Swatches</div>
-                <div className="text-[11px] text-[#999] font-normal leading-snug">Up to 5 fabric samples shipped at no cost</div>
-              </div>
-              <ChevronRight size={18} className="text-[#ccc] group-hover:text-[#999] group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
+              <ChevronRight size={20} className="text-[#ccc] group-hover:text-[#999] group-hover:translate-x-0.5 transition-all shrink-0 ml-4" />
             </div>
           </button>
 
-          {/* Trust signals — minimal */}
-          <div className="flex justify-center items-center gap-8">
-            <div className="flex flex-col items-center gap-1.5">
-              <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: '#f5f3ec' }}>
-                <PenTool size={15} className="text-[#999]" strokeWidth={1.5} />
-              </div>
+          {/* Trust signals */}
+          <div className="flex justify-center items-center gap-10">
+            <div className="flex flex-col items-center gap-2">
+              <PenTool size={18} className="text-[#bbb]" strokeWidth={1.5} />
               <span className="text-[9px] font-medium text-[#aaa] uppercase tracking-[0.15em]">Any Shape</span>
             </div>
-            <div className="w-[1px] h-8" style={{ backgroundColor: '#e8e5de' }} />
-            <div className="flex flex-col items-center gap-1.5">
-              <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: '#f5f3ec' }}>
-                <Package size={15} className="text-[#999]" strokeWidth={1.5} />
-              </div>
-              <span className="text-[9px] font-medium text-[#aaa] uppercase tracking-[0.15em]">7-Day Ship</span>
+            <div className="flex flex-col items-center gap-2">
+              <Package size={18} className="text-[#bbb]" strokeWidth={1.5} />
+              <span className="text-[9px] font-medium text-[#aaa] uppercase tracking-[0.15em]">7-Day Shipping</span>
             </div>
-            <div className="w-[1px] h-8" style={{ backgroundColor: '#e8e5de' }} />
-            <div className="flex flex-col items-center gap-1.5">
-              <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: '#f5f3ec' }}>
-                <Truck size={15} className="text-[#999]" strokeWidth={1.5} />
-              </div>
+            <div className="flex flex-col items-center gap-2">
+              <Truck size={18} className="text-[#bbb]" strokeWidth={1.5} />
               <span className="text-[9px] font-medium text-[#aaa] uppercase tracking-[0.15em]">Free Shipping</span>
             </div>
           </div>
