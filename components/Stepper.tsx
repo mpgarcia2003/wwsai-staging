@@ -19,9 +19,9 @@ interface StepperProps {
   onAddSwatch: (fabric: Fabric) => void;
   requestedSwatches: string[];
   analysis?: RoomAnalysis;
-  // NEW: Progressive accordion props
   completedSteps: Set<number>;
   onConfirmStep: (index: number) => void;
+  onAutoAdvance: (index: number) => void;
 }
 
 const formatDim = (value: number, fraction: string) => {
@@ -107,7 +107,8 @@ const Stepper: React.FC<StepperProps> = ({
   requestedSwatches,
   analysis,
   completedSteps,
-  onConfirmStep
+  onConfirmStep,
+  onAutoAdvance
 }) => {
   const { t } = useLanguage();
   const [showProPath, setShowProPath] = useState(false);
@@ -281,31 +282,32 @@ const Stepper: React.FC<StepperProps> = ({
             <div 
               key={index} 
               onClick={() => handleToggle(index)}
-              className="border border-gray-100 bg-white rounded-xl shadow-sm cursor-pointer transition-all duration-300 hover:bg-[#faf8f4] hover:translate-x-0.5 group"
-              style={{ animation: 'fadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}
+              className="bg-white rounded-xl cursor-pointer transition-all duration-300 group"
+              style={{ 
+                animation: 'fadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                border: '1px solid rgba(20,20,20,0.06)',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+              }}
             >
-              <div className="flex items-center p-2.5 min-h-[52px]">
-                {/* Green check */}
-                <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mr-3" style={{ background: 'linear-gradient(135deg, #c8a165, #d4b07a)' }}>
-                  <Check size={13} className="text-white" strokeWidth={3} />
+              <div className="flex items-center p-3.5 min-h-[56px]">
+                <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mr-3.5" style={{ background: 'linear-gradient(135deg, #c8a165, #d4b07a)' }}>
+                  <Check size={13} className="text-white" strokeWidth={2.5} />
                 </div>
                 
-                {/* Step info */}
                 <div className="flex-1 min-w-0">
-                  <div className="text-[9px] font-black uppercase tracking-[0.12em] text-slate-400">
-                    {t('step.prefix')} {index + 1}
+                  <div className="text-[9px] font-medium uppercase tracking-[0.14em] text-[#aaa]">
+                    Step {index + 1}
                   </div>
-                  <div className="text-sm font-black text-slate-900 tracking-tight">
+                  <div className="text-[14px] font-medium text-[#1a1a1a]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
                     {translatedLabel}
                   </div>
                 </div>
 
-                {/* Selection value */}
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold truncate max-w-[120px]" style={{ color: '#c8a165' }}>
+                <div className="flex items-center gap-2.5">
+                  <span className="text-[11px] font-medium truncate max-w-[140px]" style={{ color: '#c8a165' }}>
                     {summaryText}
                   </span>
-                  <span className="text-[9px] font-bold text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="text-[9px] font-medium text-[#ccc] opacity-0 group-hover:opacity-100 transition-all duration-200">
                     edit
                   </span>
                 </div>
@@ -319,23 +321,22 @@ const Stepper: React.FC<StepperProps> = ({
           <div 
             key={index} 
             id={`step-container-${index}`} 
-            className="border-2 transition-all duration-300 rounded-xl shadow-lg bg-white overflow-hidden"
+            className="bg-white rounded-xl overflow-hidden"
             style={{ 
-              borderColor: '#c8a165',
-              boxShadow: '0 4px 24px rgba(200, 161, 101, 0.1)',
-              animation: 'slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+              border: '2px solid #c8a165',
+              boxShadow: '0 8px 32px rgba(200, 161, 101, 0.1)',
+              animation: 'stepReveal 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards'
             }}
           >
-            {/* Step header - not clickable to collapse in progressive mode */}
-            <div className="flex items-center justify-between p-2 min-h-[52px]">
+            <div className="flex items-center justify-between p-3.5 min-h-[56px]">
               <div className="flex items-center gap-3">
                 <span 
-                  className="text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-[0.1em] text-white"
-                  style={{ backgroundColor: '#c8a165' }}
+                  className="text-[10px] font-semibold px-2.5 py-1 rounded-md uppercase tracking-[0.12em] text-white"
+                  style={{ background: 'linear-gradient(135deg, #c8a165, #b8914f)' }}
                 >
-                  {t('step.prefix')} {index + 1}
+                  Step {index + 1}
                 </span>
-                <span className="text-sm font-black text-slate-900 tracking-tight">{translatedLabel}</span>
+                <span className="text-[15px] font-medium text-[#1a1a1a]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>{translatedLabel}</span>
               </div>
             </div>
 
@@ -349,6 +350,7 @@ const Stepper: React.FC<StepperProps> = ({
                               onClick={() => {
                                 updateConfig('shape', shapeKey as ShapeType);
                                 trackEvent('shape_select', { shape_name: shapeKey });
+                                setTimeout(() => onAutoAdvance(0), 400);
                               }} 
                               className={`group flex flex-col items-center justify-center p-2 rounded-xl border-2 transition-all duration-300 min-h-[100px] ${
                                   config.shape === shapeKey 
@@ -481,7 +483,7 @@ const Stepper: React.FC<StepperProps> = ({
                 <div className="space-y-3 pt-2">
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                         <button 
-                          onClick={() => updateConfig('shadeType', 'Light Filtering')} 
+                          onClick={() => { updateConfig('shadeType', 'Light Filtering'); setTimeout(() => onAutoAdvance(2), 400); }} 
                           className={`p-4 border-2 rounded-xl transition-all flex flex-col items-center justify-center gap-2 text-center group relative ${
                               config.shadeType === 'Light Filtering' 
                               ? 'border-[#c8a165] bg-[#faf8f4] shadow-md' 
@@ -500,7 +502,7 @@ const Stepper: React.FC<StepperProps> = ({
                         </button>
                         
                         <button 
-                          onClick={() => updateConfig('shadeType', 'Blackout')} 
+                          onClick={() => { updateConfig('shadeType', 'Blackout'); setTimeout(() => onAutoAdvance(2), 400); }} 
                           className={`p-4 border-2 rounded-xl transition-all flex flex-col items-center justify-center gap-2 text-center group relative ${
                               config.shadeType === 'Blackout' 
                               ? 'border-[#c8a165] bg-[#faf8f4] shadow-md' 
@@ -519,7 +521,7 @@ const Stepper: React.FC<StepperProps> = ({
                         </button>
 
                         <button 
-                          onClick={() => updateConfig('shadeType', 'All')} 
+                          onClick={() => { updateConfig('shadeType', 'All'); setTimeout(() => onAutoAdvance(2), 400); }} 
                           className={`p-4 border-2 rounded-xl transition-all flex flex-col items-center justify-center gap-2 text-center group relative ${
                               config.shadeType === 'All' 
                               ? 'border-[#c8a165] bg-[#faf8f4] shadow-md' 
@@ -545,7 +547,7 @@ const Stepper: React.FC<StepperProps> = ({
               {index === 4 && (
                 <div className="grid grid-cols-2 gap-2 pt-2">
                     {[t('mount.inside'), t('mount.outside')].map((m, i) => (
-                        <button key={m} onClick={() => updateConfig('mountType', i === 0 ? 'Inside Mount' : 'Outside Mount')} className={`p-3 border-2 rounded-xl font-black text-xs uppercase tracking-wider transition-all ${((i === 0 && config.mountType === 'Inside Mount') || (i === 1 && config.mountType === 'Outside Mount')) ? 'border-[#c8a165] bg-[#faf8f4] shadow-sm' : 'border-gray-200 hover:border-gray-300 bg-white'}`}>{m}</button>
+                        <button key={m} onClick={() => { updateConfig('mountType', i === 0 ? 'Inside Mount' : 'Outside Mount'); setTimeout(() => onAutoAdvance(4), 400); }} className={`p-3 border-2 rounded-xl font-black text-xs uppercase tracking-wider transition-all ${((i === 0 && config.mountType === 'Inside Mount') || (i === 1 && config.mountType === 'Outside Mount')) ? 'border-[#c8a165] bg-[#faf8f4] shadow-sm' : 'border-gray-200 hover:border-gray-300 bg-white'}`}>{m}</button>
                     ))}
                 </div>
               )}
@@ -739,16 +741,20 @@ const Stepper: React.FC<StepperProps> = ({
                 </div>
               )}
 
-              {/* CONTINUE BUTTON — confirms step and reveals next */}
+              {/* CONTINUE BUTTON */}
               <button
                 onClick={() => onConfirmStep(index)}
-                className="w-full mt-4 py-3 px-4 rounded-xl text-white font-black text-xs uppercase tracking-widest transition-all hover:opacity-90 flex items-center justify-center gap-2"
+                className="w-full mt-5 py-3.5 px-4 rounded-xl text-white font-medium text-[13px] tracking-wide transition-all duration-300 hover:shadow-xl active:scale-[0.98] flex items-center justify-center gap-2 group/btn"
                 style={{ 
-                  background: 'linear-gradient(135deg, #c8a165, #b8914f)',
-                  boxShadow: '0 4px 15px rgba(200, 161, 101, 0.3)'
+                  background: 'linear-gradient(90deg, #C8A165 0%, #E7D8B8 55%, #C8A165 100%)',
+                  boxShadow: '0 6px 24px rgba(200, 161, 101, 0.2)',
+                  color: '#1a1a1a'
                 }}
               >
-                {isLastStep ? 'Finish Configuration' : 'Continue'} <ArrowRight size={14} />
+                <span style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                  {isLastStep ? 'Finish Configuration' : 'Continue'}
+                </span>
+                <ArrowRight size={15} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
               </button>
             </div>
           </div>
@@ -758,12 +764,13 @@ const Stepper: React.FC<StepperProps> = ({
       {/* CSS animations */}
       <style>{`
         @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(8px); }
+          from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes slideDown {
-          from { opacity: 0; transform: translateY(-6px); }
-          to { opacity: 1; transform: translateY(0); }
+        @keyframes stepReveal {
+          0% { opacity: 0; transform: translateY(-8px) scale(0.98); }
+          60% { opacity: 1; transform: translateY(2px) scale(1.005); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
         }
       `}</style>
     </div>

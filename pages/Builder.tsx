@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ShoppingCart, Ruler, FileText, Hash, Truck, ArrowRight, ArrowLeft, Palette, Wrench, Layers, Package, PenTool, ChevronRight } from 'lucide-react';
+import { ShoppingCart, Ruler, FileText, Hash, Truck, ArrowRight, ArrowLeft, Palette, Wrench, Layers, Package, PenTool, ChevronRight, X, Mail, Check } from 'lucide-react';
 import Visualizer from '../components/Visualizer';
 import Stepper from '../components/Stepper';
 import ConsultationModal from '../components/ConsultationModal';
@@ -228,6 +228,11 @@ const Builder: React.FC<BuilderProps> = ({ addToCart, addToSwatches, swatches })
   // Progressive accordion state
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
 
+  // Exit intent state
+  const [showExitIntent, setShowExitIntent] = useState(false);
+  const [exitIntentShown, setExitIntentShown] = useState(false);
+  const [exitEmail, setExitEmail] = useState('');
+
   const [config, setConfig] = useState<ShadeConfig>({
     step: 1, shape: 'Standard', shadeType: '', material: null, mountType: 'Inside Mount',
     width: 0, widthFraction: '0', height: 0, heightFraction: '0', customDims: {},
@@ -364,6 +369,44 @@ const Builder: React.FC<BuilderProps> = ({ addToCart, addToSwatches, swatches })
   };
 
   const allStepsComplete = completedSteps.size === STEPS.length;
+
+  // Smart auto-advance — confirms and advances after simple selections
+  const handleAutoAdvance = (stepIndex: number) => {
+    if (completedSteps.has(stepIndex)) return; // Already completed, don't re-fire
+    handleConfirmStep(stepIndex);
+  };
+
+  // Exit intent detection
+  useEffect(() => {
+    if (path !== 'build' || exitIntentShown) return;
+    
+    const handleMouseLeave = (e: MouseEvent) => {
+      if (e.clientY <= 0 && completedSteps.size >= 2 && !exitIntentShown) {
+        setShowExitIntent(true);
+        setExitIntentShown(true);
+        trackEvent('exit_intent_shown', { steps_completed: completedSteps.size });
+      }
+    };
+
+    document.addEventListener('mouseleave', handleMouseLeave);
+    return () => document.removeEventListener('mouseleave', handleMouseLeave);
+  }, [path, exitIntentShown, completedSteps.size]);
+
+  const handleSaveConfig = () => {
+    if (!exitEmail) return;
+    // Store config + email for recovery
+    const savedConfig = {
+      email: exitEmail,
+      config,
+      completedSteps: Array.from(completedSteps),
+      timestamp: Date.now()
+    };
+    try {
+      localStorage.setItem('wws_abandoned_config', JSON.stringify(savedConfig));
+    } catch (e) {}
+    trackEvent('exit_intent_saved', { email: exitEmail, steps_completed: completedSteps.size });
+    setShowExitIntent(false);
+  };
 
   const getShapeLabel = (s: string) => {
     const key = `shape.${s.replace(/[^a-zA-Z]/g, '').toLowerCase()}`;
@@ -538,12 +581,12 @@ const Builder: React.FC<BuilderProps> = ({ addToCart, addToSwatches, swatches })
 
   // ─── BUILD PATH (with progressive accordion) ──────────
   return (
-    <div className="bg-gray-100 h-full w-full overflow-hidden">
+    <div className="h-full w-full overflow-hidden" style={{ backgroundColor: '#FDFBF7' }}>
       <div className="max-w-screen-2xl mx-auto flex flex-col md:flex-row h-full bg-white shadow-2xl relative overflow-hidden">
           
-          {/* LEFT PANEL: Visualizer */}
-          <div className={`w-full md:w-3/5 lg:w-[60%] bg-white flex flex-col md:p-6 md:h-full overflow-hidden border-b md:border-b-0 md:border-r border-gray-200 shrink-0 transition-all duration-500 ease-in-out ${isAnyStepOpen ? 'h-[70px] p-1' : 'h-[240px] p-2'}`}>
-            <div className={`flex-1 min-h-0 relative rounded-xl md:rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 flex flex-col px-2 md:px-12 lg:px-20 py-2 md:py-4 transition-all duration-500 ${isAnyStepOpen ? 'rounded-none border-none p-0' : ''}`}>
+          {/* LEFT PANEL: Visualizer — HIDDEN on mobile */}
+          <div className="hidden md:flex w-3/5 lg:w-[60%] bg-white flex-col p-6 h-full overflow-hidden border-r border-gray-100 shrink-0">
+            <div className="flex-1 min-h-0 relative rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 flex flex-col px-12 lg:px-20 py-4">
               <div className="w-full h-full relative flex flex-col">
                   <Visualizer 
                       imageSrc={imageSrc} 
@@ -565,64 +608,49 @@ const Builder: React.FC<BuilderProps> = ({ addToCart, addToSwatches, swatches })
               </div>
             </div>
 
-            {/* Configuration Blueprint - Hidden on mobile */}
-            <div className="hidden md:block mt-4 bg-white rounded-xl border border-gray-100 p-4 shadow-sm shrink-0">
-              <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-50">
-                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                  <FileText size={12} style={{ color: '#c8a165' }} /> {t('blueprint.title')}
+            {/* Configuration Blueprint — Desktop only */}
+            <div className="mt-4 bg-white rounded-xl p-4 shrink-0" style={{ border: '1px solid rgba(20,20,20,0.06)' }}>
+              <div className="flex items-center justify-between mb-3 pb-3" style={{ borderBottom: '1px solid rgba(20,20,20,0.04)' }}>
+                <h3 className="text-[10px] font-medium text-[#aaa] uppercase tracking-[0.18em] flex items-center gap-2">
+                  <FileText size={12} style={{ color: '#c8a165' }} /> Configuration Summary
                 </h3>
               </div>
               
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
-                <div className="space-y-0.5">
-                  <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{t('blueprint.shape')}</div>
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-800">
-                    <img src={currentShape.mask} className="w-3 h-3 object-contain opacity-60" />
-                    <span className="truncate">{getShapeLabel(config.shape)}</span>
+              <div className="grid grid-cols-4 gap-4">
+                {[
+                  { label: 'Shape', value: getShapeLabel(config.shape), icon: <img src={currentShape.mask} className="w-3 h-3 object-contain opacity-50" /> },
+                  { label: 'Material', value: config.material ? config.material.name : '—', icon: null },
+                  { label: 'Size', value: sizeSummary, icon: <Ruler size={10} className="text-[#ccc]" /> },
+                  { label: 'Qty', value: config.quantity.toString(), icon: <Hash size={10} className="text-[#ccc]" /> },
+                ].map((item, i) => (
+                  <div key={i} className="space-y-0.5">
+                    <div className="text-[9px] font-medium text-[#aaa] uppercase tracking-[0.12em]">{item.label}</div>
+                    <div className="flex items-center gap-1.5 text-[10px] font-medium text-[#333] truncate">
+                      {item.icon}{item.value}
+                    </div>
                   </div>
-                </div>
-
-                <div className="space-y-0.5">
-                  <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{t('blueprint.material')}</div>
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-800 truncate">
-                    {config.material ? config.material.name : <span className="text-slate-300">{t('blueprint.pending')}</span>}
-                  </div>
-                </div>
-
-                <div className="space-y-0.5">
-                  <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{t('blueprint.size')}</div>
-                  <div className="text-[10px] font-bold text-slate-800 flex items-center gap-1.5">
-                    <Ruler size={10} className="text-slate-300" />
-                    {sizeSummary}
-                  </div>
-                </div>
-
-                <div className="space-y-0.5">
-                  <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{t('blueprint.qty')}</div>
-                  <div className="text-[10px] font-bold text-slate-800 flex items-center gap-1.5">
-                    <Hash size={10} className="text-slate-300" />
-                    {config.quantity}
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
 
-          {/* RIGHT PANEL: Progressive Stepper */}
+          {/* RIGHT PANEL: Progressive Stepper — Full width on mobile */}
           <div className="w-full md:w-2/5 lg:w-[40%] flex flex-col flex-1 md:flex-none md:h-full bg-white relative overflow-hidden">
-            <div className="flex-1 overflow-y-auto p-1.5 pb-32 md:pb-1.5 scroll-smooth custom-scrollbar">
+            <div className="flex-1 overflow-y-auto p-2 md:p-2.5 pb-36 md:pb-4 scroll-smooth custom-scrollbar">
               
               {/* Progress header */}
               <div className="text-center py-3 px-2">
-                <div className="text-[9px] font-black uppercase tracking-[0.2em] mb-1" style={{ color: '#c8a165' }}>
-                  {completedSteps.size}/{STEPS.length} Steps Complete
+                <div className="text-[9px] font-medium uppercase tracking-[0.18em] mb-1.5" style={{ color: '#c8a165' }}>
+                  {completedSteps.size} of {STEPS.length} steps complete
                 </div>
-                <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: '#f5f3ec' }}>
+                <div className="h-1 rounded-full overflow-hidden" style={{ backgroundColor: '#f0ece4' }}>
                   <div 
-                    className="h-full rounded-full transition-all duration-500 ease-out"
+                    className="h-full rounded-full transition-all duration-700 ease-out"
                     style={{ 
                       width: `${(completedSteps.size / STEPS.length) * 100}%`,
-                      background: 'linear-gradient(90deg, #c8a165, #d4b07a)'
+                      background: 'linear-gradient(90deg, #c8a165, #E7D8B8, #c8a165)',
+                      backgroundSize: '200% 100%',
+                      animation: completedSteps.size > 0 ? 'shimmer 2s ease-in-out infinite' : 'none'
                     }}
                   />
                 </div>
@@ -643,49 +671,46 @@ const Builder: React.FC<BuilderProps> = ({ addToCart, addToSwatches, swatches })
                 analysis={analysis}
                 completedSteps={completedSteps}
                 onConfirmStep={handleConfirmStep}
+                onAutoAdvance={handleAutoAdvance}
               />
 
-              {/* All steps complete message */}
+              {/* All steps complete */}
               {allStepsComplete && (
-                <div className="text-center py-4 px-2" style={{ animation: 'fadeUp 0.5s ease forwards' }}>
-                  <div className="text-[9px] font-black uppercase tracking-[0.2em] mb-1" style={{ color: '#c8a165' }}>
+                <div className="text-center py-6 px-2" style={{ animation: 'fadeUp 0.5s ease forwards' }}>
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3" style={{ background: 'linear-gradient(135deg, #c8a165, #d4b07a)' }}>
+                    <Check size={20} className="text-white" strokeWidth={2} />
+                  </div>
+                  <div className="text-[13px] font-medium text-[#1a1a1a] mb-1" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
                     Configuration Complete
                   </div>
-                  <p className="text-xs text-slate-400">Tap any step above to make changes</p>
+                  <p className="text-[11px] text-[#aaa]">Tap any step above to make changes</p>
                 </div>
               )}
             </div>
 
-            {/* Footer */}
-            <div className="p-3 pb-6 md:pb-3 bg-white border-t border-gray-100 shadow-[0_-10px_40px_rgba(0,0,0,0.02)] fixed md:sticky bottom-0 left-0 right-0 md:left-auto md:right-auto w-full md:w-auto z-[60]">
+            {/* SIMPLIFIED FOOTER — Price left, single CTA right */}
+            <div 
+              className="p-4 pb-7 md:pb-4 bg-white fixed md:sticky bottom-0 left-0 right-0 md:left-auto md:right-auto w-full md:w-auto z-[60]"
+              style={{ borderTop: '1px solid rgba(20,20,20,0.06)', boxShadow: '0 -8px 30px rgba(0,0,0,0.03)' }}
+            >
               <div className="max-w-md mx-auto">
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center justify-between gap-4">
                   
-                  {/* Left: Price */}
+                  {/* Price */}
                   <div className="shrink-0">
-                    <div className="text-[8px] font-black text-slate-400 uppercase tracking-wider">{t('common.total')}</div>
-                    <div className="flex items-center gap-2">
-                      <div className="text-xl md:text-2xl font-black text-slate-900">${priceBreakdown.total.toFixed(2)}</div>
-                      <div className="text-[7px] md:text-[8px] font-bold text-green-600 uppercase flex items-center gap-1">
-                        <Truck size={10} /> {t('common.freeShipping')}
+                    <div className="text-[9px] font-medium text-[#aaa] uppercase tracking-[0.12em]">Total</div>
+                    <div className="flex items-baseline gap-2">
+                      <div className="text-[22px] md:text-[26px] font-medium text-[#1a1a1a]" style={{ fontFamily: "'Playfair Display', Georgia, serif", letterSpacing: '-0.02em' }}>
+                        ${priceBreakdown.total.toFixed(2)}
+                      </div>
+                      <div className="text-[8px] font-medium text-[#2d8a4e] uppercase tracking-wider flex items-center gap-0.5">
+                        <Truck size={9} /> Free Shipping
                       </div>
                     </div>
                   </div>
                   
-                  {/* Right: Buttons */}
-                  <div className="flex gap-2">
-                    {openStep !== null && openStep < STEPS.length - 1 && (
-                      <button 
-                        onClick={() => handleConfirmStep(openStep)}
-                        className="text-white font-bold uppercase tracking-wider text-[9px] md:text-[10px] py-2.5 md:py-3 px-3 md:px-5 rounded-xl transition-all flex items-center gap-1"
-                        style={{ 
-                          background: 'linear-gradient(135deg, #c8a165, #b8914f)',
-                          boxShadow: '0 4px 15px rgba(200,161,101,0.3)'
-                        }}
-                      >
-                        {t('common.nextStep')} <ArrowRight size={12} />
-                      </button>
-                    )}
+                  {/* Single CTA — context-aware */}
+                  {allStepsComplete ? (
                     <button 
                       onClick={() => addToCart({
                         id: `item_${Date.now()}`,
@@ -696,19 +721,38 @@ const Builder: React.FC<BuilderProps> = ({ addToCart, addToSwatches, swatches })
                         timestamp: Date.now()
                       })}
                       disabled={priceBreakdown.total === 0}
-                      className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold uppercase tracking-wider text-[9px] md:text-[10px] py-2.5 md:py-3 px-3 md:px-4 rounded-xl transition-all flex items-center justify-center gap-1 disabled:opacity-30"
+                      className="py-3 px-6 rounded-xl font-medium text-[13px] tracking-wide transition-all duration-300 hover:shadow-xl active:scale-[0.98] flex items-center gap-2 disabled:opacity-30"
+                      style={{ 
+                        background: 'linear-gradient(90deg, #C8A165 0%, #E7D8B8 55%, #C8A165 100%)',
+                        boxShadow: '0 6px 24px rgba(200,161,101,0.2)',
+                        color: '#1a1a1a',
+                        fontFamily: "'Playfair Display', Georgia, serif"
+                      }}
                     >
-                      <ShoppingCart size={12} /> {t('common.add')}
+                      <ShoppingCart size={15} /> Add to Cart
                     </button>
-                  </div>
-                  
+                  ) : (
+                    <button 
+                      onClick={() => openStep !== null && handleConfirmStep(openStep)}
+                      disabled={openStep === null}
+                      className="py-3 px-6 rounded-xl font-medium text-[13px] tracking-wide transition-all duration-300 hover:shadow-xl active:scale-[0.98] flex items-center gap-2 disabled:opacity-30"
+                      style={{ 
+                        background: 'linear-gradient(90deg, #C8A165 0%, #E7D8B8 55%, #C8A165 100%)',
+                        boxShadow: '0 6px 24px rgba(200,161,101,0.2)',
+                        color: '#1a1a1a',
+                        fontFamily: "'Playfair Display', Georgia, serif"
+                      }}
+                    >
+                      Continue <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
+                    </button>
+                  )}
                 </div>
 
                 <button 
                   onClick={() => setIsConsultationOpen(true)} 
-                  className="w-full mt-2 text-[9px] font-medium text-slate-400 hover:text-[#c8a165] transition-colors text-center"
+                  className="w-full mt-2 text-[9px] font-normal text-[#bbb] hover:text-[#c8a165] transition-colors text-center"
                 >
-                  {t('common.needHelp')}
+                  Need help with your configuration?
                 </button>
               </div>
             </div>
@@ -717,9 +761,73 @@ const Builder: React.FC<BuilderProps> = ({ addToCart, addToSwatches, swatches })
 
       <ConsultationModal isOpen={isConsultationOpen} onClose={() => setIsConsultationOpen(false)} />
 
+      {/* EXIT INTENT MODAL */}
+      {showExitIntent && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center" style={{ animation: 'fadeUp 0.3s ease forwards' }}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowExitIntent(false)} />
+          <div className="relative bg-white rounded-2xl p-8 max-w-sm w-full mx-4 shadow-2xl" style={{ animation: 'modalSpring 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}>
+            <button onClick={() => setShowExitIntent(false)} className="absolute top-4 right-4 text-[#ccc] hover:text-[#999] transition-colors">
+              <X size={18} />
+            </button>
+            
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#f5f3ec' }}>
+                <Mail size={20} style={{ color: '#c8a165' }} strokeWidth={1.5} />
+              </div>
+              <h3 className="text-[20px] font-normal text-[#1a1a1a] mb-1" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                Save Your Progress?
+              </h3>
+              <p className="text-[12px] text-[#999] font-normal leading-relaxed">
+                We'll email you a link to pick up right where you left off — {completedSteps.size} step{completedSteps.size !== 1 ? 's' : ''} already done.
+              </p>
+            </div>
+            
+            <div className="mb-4">
+              <input
+                type="email"
+                value={exitEmail}
+                onChange={(e) => setExitEmail(e.target.value)}
+                placeholder="your@email.com"
+                className="w-full p-3.5 rounded-xl text-[13px] font-normal outline-none transition-all duration-200"
+                style={{ border: '1px solid #e0dcd5', color: '#333' }}
+                onFocus={(e) => { e.target.style.borderColor = '#c8a165'; e.target.style.boxShadow = '0 0 0 3px rgba(200,161,101,0.08)'; }}
+                onBlur={(e) => { e.target.style.borderColor = '#e0dcd5'; e.target.style.boxShadow = 'none'; }}
+                autoFocus
+              />
+            </div>
+            
+            <button
+              onClick={handleSaveConfig}
+              disabled={!exitEmail.includes('@')}
+              className="w-full py-3.5 rounded-xl font-medium text-[13px] tracking-wide transition-all duration-300 disabled:opacity-30"
+              style={{ 
+                background: 'linear-gradient(90deg, #C8A165 0%, #E7D8B8 55%, #C8A165 100%)',
+                boxShadow: '0 4px 16px rgba(200,161,101,0.2)',
+                color: '#1a1a1a',
+                fontFamily: "'Playfair Display', Georgia, serif"
+              }}
+            >
+              Save My Configuration
+            </button>
+            
+            <button
+              onClick={() => setShowExitIntent(false)}
+              className="w-full mt-2 py-2 text-[11px] font-normal text-[#bbb] hover:text-[#888] transition-colors"
+            >
+              No thanks, I'll start over
+            </button>
+          </div>
+        </div>
+      )}
+
       <style>{`
         @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+        @keyframes shimmer { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+        @keyframes modalSpring {
+          0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+          70% { transform: translateY(-4px) scale(1.01); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
       `}</style>
     </div>
   );
