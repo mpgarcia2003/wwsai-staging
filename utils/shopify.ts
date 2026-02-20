@@ -251,6 +251,16 @@ export const createShopifyCheckout = async (
 };
 
 export const redirectToShopifyCheckout = (checkoutUrl: string) => {
+  // Save backup in case checkout fails, then clear active cart
+  try {
+    const currentCart = localStorage.getItem('wws_cart_v1');
+    if (currentCart) {
+      localStorage.setItem('wws_cart_backup', currentCart);
+    }
+    // Clear the active cart so it's empty when they return
+    localStorage.setItem('wws_cart_v1', '[]');
+  } catch (e) {}
+  
   if (window.top && window.top !== window) {
     window.top.location.href = checkoutUrl;
   } else {

@@ -542,7 +542,7 @@ const Stepper: React.FC<StepperProps> = ({
                 </div>
               )}
 
-              {index === 3 && <div className="pt-2"><FabricSuggestions loading={loadingFabrics} fabrics={fabrics} onSelect={onSelectFabric} selectedId={config.material?.id} width={config.width} height={config.height} widthFraction={config.widthFraction} heightFraction={config.heightFraction} onAddSwatch={onAddSwatch} requestedSwatches={requestedSwatches} analysis={analysis} config={config} /></div>}
+              {index === 3 && <div className="pt-2"><FabricSuggestions loading={loadingFabrics} fabrics={fabrics} onSelect={(f) => { onSelectFabric(f); setTimeout(() => onAutoAdvance(3), 400); }} selectedId={config.material?.id} width={config.width} height={config.height} widthFraction={config.widthFraction} heightFraction={config.heightFraction} onAddSwatch={onAddSwatch} requestedSwatches={requestedSwatches} analysis={analysis} config={config} /></div>}
 
               {index === 4 && (
                 <div className="grid grid-cols-2 gap-2 pt-2">
