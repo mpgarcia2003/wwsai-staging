@@ -5,7 +5,7 @@ import Stepper from '../components/Stepper';
 import ConsultationModal from '../components/ConsultationModal';
 import { ShadeConfig, Fabric, WindowSelection, CartItem, RoomAnalysis, ShapeType } from '../types';
 import { DEFAULT_ROOM_IMAGE, getGridPrice, SHAPE_CONFIGS, VALANCE_OPTIONS, SIDE_CHANNEL_OPTIONS, STEPS, getFabricUrl } from '../constants';
-import { getDynamicFabrics } from '../utils/storage';
+import { getDynamicFabrics, saveSwatchRequest } from '../utils/storage';
 import { useLanguage } from '../LanguageContext';
 import { trackEvent } from '../utils/analytics';
 
@@ -41,6 +41,8 @@ const SwatchPath: React.FC<{
   const [showForm, setShowForm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({ name: '', email: '', address: '', cityStateZip: '' });
 
   const toggleSwatch = (fabric: Fabric) => {
     const next = new Set(selectedIds);
@@ -76,6 +78,38 @@ const SwatchPath: React.FC<{
   }
 
   if (showForm) {
+    const isFormValid = formData.name.trim() && formData.email.includes('@') && formData.address.trim() && formData.cityStateZip.trim();
+    
+    const handleSubmitSwatches = async () => {
+      if (!isFormValid || isSubmitting) return;
+      setIsSubmitting(true);
+      
+      const selectedFabrics = fabrics.filter(f => selectedIds.has(f.id)).map(f => ({
+        id: f.id, name: f.name, category: f.category
+      }));
+      
+      const saved = await saveSwatchRequest({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        address: formData.address.trim(),
+        city_state_zip: formData.cityStateZip.trim(),
+        fabrics: selectedFabrics
+      });
+      
+      trackEvent('swatch_order_submitted', { 
+        swatch_count: selectedIds.size, 
+        saved_to_supabase: saved,
+        fabrics: selectedFabrics.map(f => f.name)
+      });
+      
+      setIsSubmitting(false);
+      setSubmitted(true);
+    };
+
+    const inputStyle = { border: '1px solid #e0dcd5', color: '#333' };
+    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => { e.target.style.borderColor = '#c8a165'; e.target.style.boxShadow = '0 0 0 3px rgba(200,161,101,0.08)'; };
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => { e.target.style.borderColor = '#e0dcd5'; e.target.style.boxShadow = 'none'; };
+
     return (
       <div className="p-5" style={{ animation: 'fadeUp 0.4s ease forwards' }}>
         <div className="flex gap-2 flex-wrap mb-5 p-3 rounded-xl" style={{ backgroundColor: '#f9f7f3', border: '1px solid #ece8e0' }}>
@@ -89,37 +123,48 @@ const SwatchPath: React.FC<{
           ))}
         </div>
 
-        <h3 className="text-lg font-light text-[#1a1a1a] mb-1 tracking-tight">Where should we send them?</h3>
+        <h3 className="text-lg font-normal text-[#1a1a1a] mb-1 tracking-tight" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>Where should we send them?</h3>
         <p className="text-[11px] text-[#aaa] mb-5">100% free — no credit card required</p>
 
-        {[
-          { label: 'Full Name', placeholder: 'Jane Smith', type: 'text' },
-          { label: 'Email', placeholder: 'jane@example.com', type: 'email' },
-          { label: 'Street Address', placeholder: '123 Main St', type: 'text' },
-          { label: 'City, State, ZIP', placeholder: 'New York, NY 10001', type: 'text' },
-        ].map((field, i) => (
-          <div key={i} className="mb-3">
-            <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#aaa] block mb-1">{field.label}</label>
-            <input
-              type={field.type}
-              placeholder={field.placeholder}
-              className="w-full p-3 rounded-lg text-[13px] font-normal outline-none transition-all duration-200"
-              style={{ fontFamily: 'inherit', border: '1px solid #e0dcd5', color: '#333' }}
-              onFocus={(e) => { e.target.style.borderColor = '#c8a165'; e.target.style.boxShadow = '0 0 0 3px rgba(200,161,101,0.08)'; }}
-              onBlur={(e) => { e.target.style.borderColor = '#e0dcd5'; e.target.style.boxShadow = 'none'; }}
-            />
-          </div>
-        ))}
+        <div className="mb-3">
+          <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#aaa] block mb-1">Full Name</label>
+          <input type="text" placeholder="Jane Smith" value={formData.name}
+            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+            className="w-full p-3 rounded-lg text-[13px] font-normal outline-none transition-all duration-200"
+            style={inputStyle} onFocus={handleFocus} onBlur={handleBlur} />
+        </div>
+        <div className="mb-3">
+          <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#aaa] block mb-1">Email</label>
+          <input type="email" placeholder="jane@example.com" value={formData.email}
+            onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+            className="w-full p-3 rounded-lg text-[13px] font-normal outline-none transition-all duration-200"
+            style={inputStyle} onFocus={handleFocus} onBlur={handleBlur} />
+        </div>
+        <div className="mb-3">
+          <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#aaa] block mb-1">Street Address</label>
+          <input type="text" placeholder="123 Main St" value={formData.address}
+            onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+            className="w-full p-3 rounded-lg text-[13px] font-normal outline-none transition-all duration-200"
+            style={inputStyle} onFocus={handleFocus} onBlur={handleBlur} />
+        </div>
+        <div className="mb-3">
+          <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#aaa] block mb-1">City, State, ZIP</label>
+          <input type="text" placeholder="New York, NY 10001" value={formData.cityStateZip}
+            onChange={(e) => setFormData(prev => ({ ...prev, cityStateZip: e.target.value }))}
+            className="w-full p-3 rounded-lg text-[13px] font-normal outline-none transition-all duration-200"
+            style={inputStyle} onFocus={handleFocus} onBlur={handleBlur} />
+        </div>
 
         <button
-          onClick={() => {
-            setSubmitted(true);
-            trackEvent('swatch_order_submitted', { swatch_count: selectedIds.size });
-          }}
-          className="w-full mt-3 py-3 rounded-xl text-white font-medium text-[13px] tracking-wide transition-all hover:opacity-90"
-          style={{ background: 'linear-gradient(135deg, #c8a165, #b8914f)', boxShadow: '0 2px 15px rgba(200,161,101,0.2)' }}
+          onClick={handleSubmitSwatches}
+          disabled={!isFormValid || isSubmitting}
+          className="w-full mt-3 py-3 rounded-xl font-medium text-[13px] tracking-wide transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-40"
+          style={isFormValid ? { 
+            background: 'linear-gradient(90deg, #C8A165 0%, #E7D8B8 55%, #C8A165 100%)', 
+            boxShadow: '0 4px 16px rgba(200,161,101,0.2)', color: '#1a1a1a' 
+          } : { backgroundColor: '#e0dcd5', color: '#bbb' }}
         >
-          Send My Free Swatches
+          {isSubmitting ? 'Saving...' : 'Send My Free Swatches'}
         </button>
         <button onClick={() => setShowForm(false)} className="w-full mt-2 py-2 text-[#bbb] text-[11px] font-normal hover:text-[#888] transition-colors">
           ← Back to fabric selection
@@ -707,6 +752,11 @@ const Builder: React.FC<BuilderProps> = ({ addToCart, addToSwatches, swatches })
                         <Truck size={9} /> Free Shipping
                       </div>
                     </div>
+                    {priceBreakdown.total > 50 && (
+                      <div className="text-[10px] text-[#999] mt-0.5 flex items-center gap-1">
+                        or <span className="font-medium text-[#6b6bef]">${(priceBreakdown.total / 12).toFixed(2)}/mo</span> with <span className="font-semibold italic text-[#6b6bef]">affirm</span>
+                      </div>
+                    )}
                   </div>
                   
                   {/* Single CTA — context-aware */}

@@ -91,6 +91,39 @@ export const getDynamicFabrics = async (): Promise<Fabric[]> => {
   }));
 };
 
+// --- SWATCH REQUESTS ---
+export const saveSwatchRequest = async (request: {
+  name: string;
+  email: string;
+  address: string;
+  city_state_zip: string;
+  fabrics: { id: string; name: string; category: string }[];
+}): Promise<boolean> => {
+  const payload = {
+    id: `SWATCH-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+    name: request.name,
+    email: request.email,
+    address: request.address,
+    city_state_zip: request.city_state_zip,
+    fabrics: sanitizeForJsonb(request.fabrics),
+    status: 'pending',
+    created_at: new Date().toISOString()
+  };
+  
+  const { error } = await supabase.from('swatch_requests').insert([payload]);
+  if (error) {
+    console.error('Swatch request save error:', error.message);
+    // Fallback: save to localStorage so we don't lose the lead
+    try {
+      const existing = JSON.parse(localStorage.getItem('wws_pending_swatch_requests') || '[]');
+      existing.push(payload);
+      localStorage.setItem('wws_pending_swatch_requests', JSON.stringify(existing));
+    } catch (e) {}
+    return false;
+  }
+  return true;
+};
+
 // --- SHARED CARTS ---
 export const saveSharedCart = async (cart: CartItem[], swatches: Fabric[]): Promise<string | null> => {
   const shareId = `CART-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
