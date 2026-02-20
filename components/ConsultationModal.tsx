@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Phone, CircleCheck, Clock } from 'lucide-react';
 import { trackEvent } from '../utils/analytics';
 import { saveConsultationRequest } from '../utils/storage';
+import { notifyAdminConsultation } from '../utils/email';
 
 interface ConsultationModalProps {
   isOpen: boolean;
@@ -32,6 +33,12 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
       preferred_time: time,
       phone_provided: phone.length > 0,
       saved_to_supabase: saved
+    });
+
+    // Notify admin via email
+    notifyAdminConsultation({
+      phone: phone.trim(),
+      preferred_time: time
     });
 
     setIsSubmitting(false);

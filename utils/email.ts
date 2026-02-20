@@ -208,6 +208,163 @@ export const sendQuoteRequest = async (order: Order) => {
     }
 };
 
+
+// --- ADMIN LEAD NOTIFICATIONS ---
+
+export const notifyAdminSwatchRequest = async (request: {
+  name: string;
+  email: string;
+  address: string;
+  city_state_zip: string;
+  fabrics: { id: string; name: string; category: string }[];
+}) => {
+  const settings = getEmailSettings();
+  if (!settings.serviceId || !settings.publicKey || !settings.adminTemplateId) return false;
+
+  const fabricList = request.fabrics.map(f => `• ${f.name} (${f.category})`).join('<br/>');
+  const htmlBody = `
+<div style="background-color:#f8fafc;padding:40px 10px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0"><tr><td align="center">
+    <div style="max-width:440px;width:100%;background:#fff;border-radius:24px;box-shadow:0 10px 25px -5px rgba(0,0,0,0.05);border:1px solid #e2e8f0;text-align:left;">
+      <div style="padding:24px;border-bottom:1px solid #f1f5f9;">
+        <span style="font-weight:800;font-size:18px;color:#0f172a;">🎨 New Swatch Request</span>
+      </div>
+      <div style="padding:20px;">
+        <div style="background:#f8fafc;border:1px solid #f1f5f9;border-radius:16px;padding:16px;margin-bottom:12px;">
+          <div style="font-weight:700;font-size:14px;color:#0f172a;margin-bottom:8px;">${request.name}</div>
+          <div style="font-size:13px;color:#64748b;">📧 ${request.email}</div>
+          <div style="font-size:13px;color:#64748b;margin-top:4px;">📍 ${request.address}, ${request.city_state_zip}</div>
+        </div>
+        <div style="background:#f8fafc;border:1px solid #f1f5f9;border-radius:16px;padding:16px;">
+          <div style="font-weight:700;font-size:13px;color:#0f172a;margin-bottom:8px;">Fabrics Requested (${request.fabrics.length})</div>
+          <div style="font-size:12px;color:#64748b;line-height:1.8;">${fabricList}</div>
+        </div>
+      </div>
+    </div>
+  </td></tr></table>
+</div>`;
+
+  try {
+    const targetEmail = settings.adminEmail || 'hello@worldwideshades.com';
+    await emailjs.send(settings.serviceId, settings.adminTemplateId, {
+      order_id: 'SWATCH-' + Date.now(),
+      customer_name: request.name,
+      customer_email: request.email,
+      to_email: targetEmail,
+      email: targetEmail,
+      order_total: '0.00',
+      message_html: htmlBody,
+      shipping_address: request.address + ', ' + request.city_state_zip,
+    }, settings.publicKey);
+    return true;
+  } catch (error: any) {
+    console.error('Swatch admin notification failed:', error?.text || error?.message || error);
+    return false;
+  }
+};
+
+export const notifyAdminConsultation = async (request: {
+  phone: string;
+  preferred_time: string;
+}) => {
+  const settings = getEmailSettings();
+  if (!settings.serviceId || !settings.publicKey || !settings.adminTemplateId) return false;
+
+  const htmlBody = `
+<div style="background-color:#f8fafc;padding:40px 10px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0"><tr><td align="center">
+    <div style="max-width:440px;width:100%;background:#fff;border-radius:24px;box-shadow:0 10px 25px -5px rgba(0,0,0,0.05);border:1px solid #e2e8f0;text-align:left;">
+      <div style="padding:24px;border-bottom:1px solid #f1f5f9;">
+        <span style="font-weight:800;font-size:18px;color:#0f172a;">📞 Design Expert Call Request</span>
+      </div>
+      <div style="padding:20px;">
+        <div style="background:#f8fafc;border:1px solid #f1f5f9;border-radius:16px;padding:20px;text-align:center;">
+          <div style="font-size:28px;font-weight:800;color:#0f172a;margin-bottom:8px;">${request.phone}</div>
+          <div style="font-size:14px;color:#64748b;">Preferred time: <strong style="color:#0f172a;">${request.preferred_time}</strong></div>
+          <div style="margin-top:16px;background:#c8a165;color:#fff;padding:12px 24px;border-radius:12px;display:inline-block;font-weight:700;font-size:14px;">
+            Call This Customer
+          </div>
+        </div>
+      </div>
+    </div>
+  </td></tr></table>
+</div>`;
+
+  try {
+    const targetEmail = settings.adminEmail || 'hello@worldwideshades.com';
+    await emailjs.send(settings.serviceId, settings.adminTemplateId, {
+      order_id: 'CONSULT-' + Date.now(),
+      customer_name: 'Consultation Request',
+      customer_email: request.phone,
+      customer_phone: request.phone,
+      to_email: targetEmail,
+      email: targetEmail,
+      order_total: '0.00',
+      message_html: htmlBody,
+      shipping_address: 'Call in the ' + request.preferred_time,
+    }, settings.publicKey);
+    return true;
+  } catch (error: any) {
+    console.error('Consultation admin notification failed:', error?.text || error?.message || error);
+    return false;
+  }
+};
+
+export const notifyAdminExitIntent = async (request: {
+  email: string;
+  stepsCompleted: number;
+  config: any;
+}) => {
+  const settings = getEmailSettings();
+  if (!settings.serviceId || !settings.publicKey || !settings.adminTemplateId) return false;
+
+  const shape = request.config?.shape || 'Unknown';
+  const fabric = request.config?.material?.name || 'Not selected';
+
+  const htmlBody = `
+<div style="background-color:#f8fafc;padding:40px 10px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0"><tr><td align="center">
+    <div style="max-width:440px;width:100%;background:#fff;border-radius:24px;box-shadow:0 10px 25px -5px rgba(0,0,0,0.05);border:1px solid #e2e8f0;text-align:left;">
+      <div style="padding:24px;border-bottom:1px solid #f1f5f9;">
+        <span style="font-weight:800;font-size:18px;color:#0f172a;">🚪 Abandoned Configuration Saved</span>
+      </div>
+      <div style="padding:20px;">
+        <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:16px;padding:16px;margin-bottom:12px;">
+          <div style="font-weight:700;font-size:14px;color:#92400e;">Customer left during configuration</div>
+          <div style="font-size:13px;color:#a16207;margin-top:4px;">They saved their progress — follow up to close!</div>
+        </div>
+        <div style="background:#f8fafc;border:1px solid #f1f5f9;border-radius:16px;padding:16px;">
+          <div style="font-size:13px;color:#64748b;line-height:2;">
+            📧 <strong style="color:#0f172a;">${request.email}</strong><br/>
+            📊 Steps completed: <strong>${request.stepsCompleted} of 8</strong><br/>
+            🔷 Shape: <strong>${shape}</strong><br/>
+            🎨 Fabric: <strong>${fabric}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </td></tr></table>
+</div>`;
+
+  try {
+    const targetEmail = settings.adminEmail || 'hello@worldwideshades.com';
+    await emailjs.send(settings.serviceId, settings.adminTemplateId, {
+      order_id: 'ABANDON-' + Date.now(),
+      customer_name: 'Abandoned Config',
+      customer_email: request.email,
+      to_email: targetEmail,
+      email: targetEmail,
+      order_total: '0.00',
+      message_html: htmlBody,
+      shipping_address: request.stepsCompleted + ' steps completed',
+    }, settings.publicKey);
+    return true;
+  } catch (error: any) {
+    console.error('Exit intent admin notification failed:', error?.text || error?.message || error);
+    return false;
+  }
+};
+
 // FIX: Updated signature to explicitly include shareUrl as the 4th argument.
 export const shareCartByEmail = async (cart: CartItem[], swatches: Fabric[], targetEmail: string, shareUrl: string) => {
     const settings = getEmailSettings();

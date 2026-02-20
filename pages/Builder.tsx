@@ -6,6 +6,7 @@ import ConsultationModal from '../components/ConsultationModal';
 import { ShadeConfig, Fabric, WindowSelection, CartItem, RoomAnalysis, ShapeType } from '../types';
 import { DEFAULT_ROOM_IMAGE, getGridPrice, SHAPE_CONFIGS, VALANCE_OPTIONS, SIDE_CHANNEL_OPTIONS, STEPS, getFabricUrl } from '../constants';
 import { getDynamicFabrics, saveSwatchRequest } from '../utils/storage';
+import { notifyAdminSwatchRequest, notifyAdminExitIntent } from '../utils/email';
 import { useLanguage } from '../LanguageContext';
 import { trackEvent } from '../utils/analytics';
 
@@ -100,6 +101,15 @@ const SwatchPath: React.FC<{
         swatch_count: selectedIds.size, 
         saved_to_supabase: saved,
         fabrics: selectedFabrics.map(f => f.name)
+      });
+      
+      // Notify admin via email
+      notifyAdminSwatchRequest({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        address: formData.address.trim(),
+        city_state_zip: formData.cityStateZip.trim(),
+        fabrics: selectedFabrics
       });
       
       setIsSubmitting(false);
@@ -450,6 +460,14 @@ const Builder: React.FC<BuilderProps> = ({ addToCart, addToSwatches, swatches })
       localStorage.setItem('wws_abandoned_config', JSON.stringify(savedConfig));
     } catch (e) {}
     trackEvent('exit_intent_saved', { email: exitEmail, steps_completed: completedSteps.size });
+    
+    // Notify admin via email
+    notifyAdminExitIntent({
+      email: exitEmail,
+      stepsCompleted: completedSteps.size,
+      config
+    });
+    
     setShowExitIntent(false);
   };
 
