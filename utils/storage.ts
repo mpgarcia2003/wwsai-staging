@@ -91,6 +91,32 @@ export const getDynamicFabrics = async (): Promise<Fabric[]> => {
   }));
 };
 
+// --- CONSULTATION REQUESTS ---
+export const saveConsultationRequest = async (request: {
+  phone: string;
+  preferred_time: string;
+}): Promise<boolean> => {
+  const payload = {
+    id: `CONSULT-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+    phone: request.phone,
+    preferred_time: request.preferred_time,
+    status: 'pending',
+    created_at: new Date().toISOString()
+  };
+  
+  const { error } = await supabase.from('consultation_requests').insert([payload]);
+  if (error) {
+    console.error('Consultation request save error:', error.message);
+    try {
+      const existing = JSON.parse(localStorage.getItem('wws_pending_consultations') || '[]');
+      existing.push(payload);
+      localStorage.setItem('wws_pending_consultations', JSON.stringify(existing));
+    } catch (e) {}
+    return false;
+  }
+  return true;
+};
+
 // --- SWATCH REQUESTS ---
 export const saveSwatchRequest = async (request: {
   name: string;

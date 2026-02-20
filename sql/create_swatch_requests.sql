@@ -33,3 +33,29 @@ CREATE INDEX IF NOT EXISTS idx_swatch_requests_email ON swatch_requests(email);
 
 -- Index on created_at for chronological ordering
 CREATE INDEX IF NOT EXISTS idx_swatch_requests_created ON swatch_requests(created_at DESC);
+
+-- =====================================================
+-- CONSULTATION REQUESTS TABLE
+-- Captures "Need a Design Expert?" call-back requests
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS consultation_requests (
+  id TEXT PRIMARY KEY,
+  phone TEXT NOT NULL,
+  preferred_time TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  called_at TIMESTAMPTZ,
+  notes TEXT
+);
+
+ALTER TABLE consultation_requests ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow anonymous insert" ON consultation_requests
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow authenticated read" ON consultation_requests
+  FOR SELECT USING (true);
+
+CREATE INDEX IF NOT EXISTS idx_consultation_requests_status ON consultation_requests(status);
+CREATE INDEX IF NOT EXISTS idx_consultation_requests_created ON consultation_requests(created_at DESC);
